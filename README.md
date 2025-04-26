@@ -52,3 +52,28 @@ export default tseslint.config({
   },
 })
 ```
+```js
+src/
+ ├─ components/
+ │   ├─ ui/
+ │   │   ├─ Button.tsx
+ │   │   ├─ Input.tsx
+ │   │   ├─ ToggleTheme.tsx
+ │   ├─ Landing.tsx
+ │   ├─ NotesList.tsx
+ │   ├─ NoteCard.tsx
+ ├─ db/
+ │   ├─ db.ts
+ │   ├─ noteService.ts
+ ├─ hooks/
+ │   ├─ useTheme.ts
+ ├─ utils/
+ │   ├─ imageHelpers.ts
+ ├─ App.tsx
+ ├─ main.tsx
+ ├─ vite-env.d.ts
+vite.config.ts
+index.html
+postcss.config.js
+tailwind.config.ts
+```
