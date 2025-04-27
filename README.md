@@ -1,7 +1,40 @@
 # NOTELY
 
-Using React + TypeScript + Vite.
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautiful, minimalistic, and responsive **Notes Manager** — built with **React**, **TypeScript**, **TailwindCSS**, **Radix UI**, **Dexie**, and **Lucide Icons**.  
+It is **Responsive** and supports **Light/Dark Mode** & **Smooth Animations**!
+
+---
+
+## ✨ Features
+
+- 📒 **Create, Edit, and Delete Notes**.
+- 🎨 **Light & Dark Mode Toggle** with smooth bounce animation.
+- 🖼️ **Image Upload** support for your notes (in Tiles view).
+- 📋 **View Modes**:  
+  - **List** view for simple scrolling.
+  - **Tiles** view for gallery-style cards.
+- 🔍 **Sort Notes** by:
+  - Title (A-Z)
+  - Created Date (New → Old)
+- ⚡ **Framer Motion Animations** for interactive feel.
+- 🌐 **Responsive Design** (works perfectly on Mobile, Tablet, Desktop).
+- 🚀 **Super Fast** and lightweight!
+
+---
+
+---
+
+## 🛠️ Tech Stack
+
+- **React 18**
+- **TypeScript**
+- **Tailwind CSS**
+- **Framer Motion** (animations)
+- **Radix UI** (accessible modals)
+- **Lucide React** (beautiful icons)
+- **Dexie - IndexedDB** (via custom service)
+
+---
 
 ## Folder Structure
 
@@ -42,55 +75,42 @@ tsconfig.json
 tsconfig.node.json
 vite.config.ts
 ```
+## ⚙️ Installation
 
-Currently, two official plugins are available:
+Clone the repository:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-### Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+git clone https://github.com/prachit082/Notely.git
+cd Notely
 ```
+Install dependencies:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm install
+# or
+yarn install
 ```
+Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
+### ✍️ Author
+Made with ❤️ by Prachit Pandit
+
+### 📜 License
+This project is licensed under the MIT License.
+
+### 💡 Future Improvements
+✅ Drag-and-drop notes reordering.
+
+✅ Markdown support for note content.
+
+✅ Pin favorite notes to top.
+
+✅ Export notes to .txt or .pdf.
+
+✅ Backend integration (optional).
+
 
