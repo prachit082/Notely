@@ -28,11 +28,15 @@ a:hover {
 }
 
 body {
+  width: 100%;
+  min-height: 100vh; /* 🔥 Full screen height */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
   margin: 0;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {

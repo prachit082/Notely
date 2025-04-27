@@ -1,13 +1,54 @@
-# React + TypeScript + Vite
+# NOTELY
 
+Using React + TypeScript + Vite.
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+## Folder Structure
+
+```js
+src/
+ ├─ components/
+ │   ├─ ui/
+ │   │   ├─ Button.tsx
+ │   │   ├─ Input.tsx
+ │   │   ├─ NoteModal.tsx
+ │   │   ├─ ToggleTheme.tsx
+ │   ├─ Footer.tsx
+ │   ├─ Landing.tsx
+ │   ├─ NoteCard.tsx
+ │   ├─ NotesList.tsx
+ ├─ db/
+ │   ├─ db.ts
+ │   ├─ noteService.ts
+ ├─ hooks/
+ │   ├─ useTheme.ts
+ ├─ utils/
+ │   ├─ cn.ts
+ │   ├─ imageHelpers.ts
+ │   ├─ toBase64.ts
+ ├─ App.css
+ ├─ App.tsx
+ ├─ index.css
+ ├─ main.tsx
+ ├─ vite-env.d.ts
+eslint.config.js
+index.html
+package-lock.json
+package.json
+postcss.config.js
+tailwind.config.ts
+tsconfig.app.json
+tsconfig.json
+tsconfig.node.json
+vite.config.ts
+```
 
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+### Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
@@ -52,28 +93,4 @@ export default tseslint.config({
   },
 })
 ```
-```js
-src/
- ├─ components/
- │   ├─ ui/
- │   │   ├─ Button.tsx
- │   │   ├─ Input.tsx
- │   │   ├─ ToggleTheme.tsx
- │   ├─ Landing.tsx
- │   ├─ NotesList.tsx
- │   ├─ NoteCard.tsx
- ├─ db/
- │   ├─ db.ts
- │   ├─ noteService.ts
- ├─ hooks/
- │   ├─ useTheme.ts
- ├─ utils/
- │   ├─ imageHelpers.ts
- ├─ App.tsx
- ├─ main.tsx
- ├─ vite-env.d.ts
-vite.config.ts
-index.html
-postcss.config.js
-tailwind.config.ts
-```
+
