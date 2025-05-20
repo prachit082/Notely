@@ -1,24 +1,31 @@
-import { useEffect, useState } from 'react';
-import { getAllNotes, addNote, updateNote, deleteNote } from '../src/db/noteService';
-import { Note } from '../src/db/db';
-import Landing from './components/Landing';
-import NotesList from './components/NotesList';
-import ToggleTheme from './components/ui/ToggleTheme';
-import { useTheme } from './hooks/useTheme';
-import NoteModal from './components/ui/NoteModal';
-import { List, LayoutGrid, Plus } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
-import Footer from './components/Footer';
+import { useEffect, useState } from "react";
+import {
+  getAllNotes,
+  addNote,
+  updateNote,
+  deleteNote,
+} from "../src/db/noteService";
+import { Note } from "../src/db/db";
+import Landing from "./components/Landing";
+import NotesList from "./components/NotesList";
+import ToggleTheme from "./components/ui/ToggleTheme";
+import { useTheme } from "./hooks/useTheme";
+import NoteModal from "./components/ui/NoteModal";
+import { List, LayoutGrid, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import Footer from "./components/Footer";
+import jsPDF from "jspdf";
 
 export default function App() {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [viewMode, setViewMode] = useState<'list' | 'tiles'>('tiles');
-  const [sortBy, setSortBy] = useState<'title' | 'createdAt'>('createdAt');
+  const [viewMode, setViewMode] = useState<"list" | "tiles">("tiles");
+  const [sortBy, setSortBy] = useState<"title" | "createdAt">("createdAt");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [deleteNoteId, setDeleteNoteId] = useState<number | null>(null);
   const [deleteNoteIds, setDeleteNoteIds] = useState<number[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useTheme();
 
@@ -29,10 +36,12 @@ export default function App() {
   const loadNotes = async () => {
     let allNotes = await getAllNotes();
 
-    if (sortBy === 'title') {
+    if (sortBy === "title") {
       allNotes = allNotes.sort((a, b) => a.title.localeCompare(b.title));
     } else {
-      allNotes = allNotes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      allNotes = allNotes.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
     }
 
     setNotes(allNotes);
@@ -50,9 +59,17 @@ export default function App() {
     setIsModalOpen(true);
   };
 
-  const handleSaveNote = async (data: { title: string; content: string; image?: string }) => {
+  const handleSaveNote = async (data: {
+    title: string;
+    content: string;
+    image?: string;
+  }) => {
     if (editingNote) {
-      await updateNote(editingNote.id!, { ...editingNote, ...data, updatedAt: new Date() });
+      await updateNote(editingNote.id!, {
+        ...editingNote,
+        ...data,
+        updatedAt: new Date(),
+      });
     } else {
       await addNote({ ...data, createdAt: new Date(), updatedAt: new Date() });
     }
@@ -78,6 +95,32 @@ export default function App() {
     }
   };
 
+  const exportNotes = (type: "pdf" | "txt") => {
+    if (notes.length === 0) return;
+
+    const content = notes
+      .map(
+        (note) =>
+          `Title: ${note.title}\nDate: ${new Date(
+            note.createdAt
+          ).toLocaleString()}\n\n${note.content}\n\n---\n`
+      )
+      .join("\n");
+
+    if (type === "txt") {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "notes.txt";
+      link.click();
+    } else if (type === "pdf") {
+      const doc = new jsPDF();
+      const lines = doc.splitTextToSize(content, 180);
+      doc.text(lines, 10, 10);
+      doc.save("notes.pdf");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-white dark:bg-gray-900">
       {/* Header */}
@@ -87,17 +130,22 @@ export default function App() {
           <div className="flex items-center gap-2">
             <ToggleTheme />
             <button
-              onClick={() => setViewMode(viewMode === 'list' ? 'tiles' : 'list')}
+              onClick={() =>
+                setViewMode(viewMode === "list" ? "tiles" : "list")
+              }
               className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
             >
               <motion.div
                 key={viewMode}
                 initial={{ rotate: -20, scale: 0.8 }}
                 animate={{ rotate: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                {viewMode === 'list' ? (
-                  <LayoutGrid size={20} className="text-black dark:text-white" />
+                {viewMode === "list" ? (
+                  <LayoutGrid
+                    size={20}
+                    className="text-black dark:text-white"
+                  />
                 ) : (
                   <List size={20} className="text-black dark:text-white" />
                 )}
@@ -108,47 +156,102 @@ export default function App() {
           {/* Sort controls */}
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative">
-  {/* Sort Button */}
-  <button
-    onClick={() => setDropdownOpen((prev) => !prev)}
-    className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
-  >
-    {sortBy === 'createdAt' ? 'Sort by Date' : 'Sort by Title'}
-  </button>
+              {/* Sort Button */}
+              <button
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                {sortBy === "createdAt" ? "Sort By Date" : "Sort By Title"}
+              </button>
 
-  {/* Dropdown Options */}
-  <AnimatePresence>
-    {dropdownOpen && (
-      <motion.ul
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.2 }}
-        className="absolute left-0 mt-1 w-28 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50"
-      >
-        <li
-          onClick={() => {
-            setSortBy('createdAt');
-            setDropdownOpen(false);
-          }}
-          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
-        >
-          Sort by Date
-        </li>
-        <li
-          onClick={() => {
-            setSortBy('title');
-            setDropdownOpen(false);
-          }}
-          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
-        >
-          Sort by Title
-        </li>
-      </motion.ul>
-    )}
-  </AnimatePresence>
-</div>
+              {/* Dropdown Options */}
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.ul
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute left-0 mt-1 w-28 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50"
+                  >
+                    <li
+                      onClick={() => {
+                        setSortBy("createdAt");
+                        setDropdownOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
+                    >
+                      Sort By Date
+                    </li>
+                    <li
+                      onClick={() => {
+                        setSortBy("title");
+                        setDropdownOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
+                    >
+                      Sort By Title
+                    </li>
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="relative">
+              {/* Export Button */}
+              <button
+                onClick={() => setExportOpen((prev) => !prev)}
+                className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  className="lucide lucide-download-icon lucide-download"
+                >
+                  <path d="M12 15V3" />
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <path d="m7 10 5 5 5-5" />
+                </svg>
+              </button>
 
+              {/* Export Options */}
+              <AnimatePresence>
+                {exportOpen && (
+                  <motion.ul
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute left-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50"
+                  >
+                    <li
+                      onClick={() => {
+                        exportNotes("txt");
+                        setExportOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
+                    >
+                      Export as TXT
+                    </li>
+                    <li
+                      onClick={() => {
+                        exportNotes("pdf");
+                        setExportOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
+                    >
+                      Export as PDF
+                    </li>
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Add button */}
             <button
@@ -158,7 +261,7 @@ export default function App() {
               <motion.div
                 initial={{ rotate: -20, scale: 0.8 }}
                 animate={{ rotate: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 whileTap={{ scale: 0.9 }}
               >
                 <Plus size={20} className="text-black dark:text-white" />
@@ -183,8 +286,7 @@ export default function App() {
               } else {
                 setDeleteNoteId(idOrIds); // Set single ID
               }
-            }
-          }
+            }}
             className="w-full max-w-7xl mx-auto"
           />
         )}
