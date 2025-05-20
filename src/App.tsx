@@ -7,7 +7,7 @@ import ToggleTheme from './components/ui/ToggleTheme';
 import { useTheme } from './hooks/useTheme';
 import NoteModal from './components/ui/NoteModal';
 import { List, LayoutGrid, Plus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Footer from './components/Footer';
 
 export default function App() {
@@ -18,6 +18,7 @@ export default function App() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [deleteNoteId, setDeleteNoteId] = useState<number | null>(null);
   const [deleteNoteIds, setDeleteNoteIds] = useState<number[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useTheme();
 
@@ -106,14 +107,48 @@ export default function App() {
 
           {/* Sort controls */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'title' | 'createdAt')}
-              className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            >
-              <option value="createdAt">Sort by Date</option>
-              <option value="title">Sort by Title</option>
-            </select>
+            <div className="relative">
+  {/* Sort Button */}
+  <button
+    onClick={() => setDropdownOpen((prev) => !prev)}
+    className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
+  >
+    {sortBy === 'createdAt' ? 'Sort by Date' : 'Sort by Title'}
+  </button>
+
+  {/* Dropdown Options */}
+  <AnimatePresence>
+    {dropdownOpen && (
+      <motion.ul
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+        className="absolute left-0 mt-1 w-28 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50"
+      >
+        <li
+          onClick={() => {
+            setSortBy('createdAt');
+            setDropdownOpen(false);
+          }}
+          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
+        >
+          Sort by Date
+        </li>
+        <li
+          onClick={() => {
+            setSortBy('title');
+            setDropdownOpen(false);
+          }}
+          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-black dark:text-white"
+        >
+          Sort by Title
+        </li>
+      </motion.ul>
+    )}
+  </AnimatePresence>
+</div>
+
 
             {/* Add button */}
             <button
