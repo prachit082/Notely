@@ -9,18 +9,29 @@ interface NoteModalProps {
   onSave?: (data: { title: string; content: string; image?: string }) => void;
   onDelete?: () => void;
   initialData?: { title: string; content: string; image?: string };
-  mode: 'edit' | 'delete'; // <- NEW
+  mode: 'edit' | 'delete';
   className?: string;
+  title?: string;          // 👈 Dynamic title
+  description?: string;    // 👈 Dynamic description
 }
 
-export default function NoteModal({ open, onClose, onSave, onDelete, initialData, mode }: NoteModalProps) {
-  const [title, setTitle] = useState(initialData?.title || '');
+export default function NoteModal({
+  open,
+  onClose,
+  onSave,
+  onDelete,
+  initialData,
+  mode,
+  title,
+  description,
+}: NoteModalProps) {
+  const [noteTitle, setNoteTitle] = useState(initialData?.title || '');
   const [content, setContent] = useState(initialData?.content || '');
   const [image, setImage] = useState<string | undefined>(initialData?.image);
 
   useEffect(() => {
     if (open) {
-      setTitle(initialData?.title || '');
+      setNoteTitle(initialData?.title || '');
       setContent(initialData?.content || '');
       setImage(initialData?.image);
     }
@@ -35,11 +46,11 @@ export default function NoteModal({ open, onClose, onSave, onDelete, initialData
   };
 
   const handleSave = () => {
-    if (!title.trim()) {
+    if (!noteTitle.trim()) {
       alert('Title is required');
       return;
     }
-    onSave?.({ title, content, image });
+    onSave?.({ title: noteTitle, content, image });
     onClose();
   };
 
@@ -53,9 +64,10 @@ export default function NoteModal({ open, onClose, onSave, onDelete, initialData
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
         <Dialog.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg space-y-4">
+          
           {/* Title */}
           <Dialog.Title className="text-lg font-semibold text-gray-800 dark:text-white">
-            {mode === 'edit' ? (initialData ? 'Edit Note' : 'Add New Note') : 'Confirm Delete'}
+            {title ? title : (mode === 'edit' ? (initialData ? 'Edit Note' : 'Add New Note') : 'Confirm Delete')}
           </Dialog.Title>
 
           {mode === 'edit' ? (
@@ -63,8 +75,8 @@ export default function NoteModal({ open, onClose, onSave, onDelete, initialData
               {/* Form for editing/adding notes */}
               <input
                 className="w-full p-2 rounded-md border dark:bg-gray-700 dark:border-gray-600"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={noteTitle}
+                onChange={(e) => setNoteTitle(e.target.value)}
                 placeholder="Note Title"
               />
               <textarea
@@ -84,6 +96,7 @@ export default function NoteModal({ open, onClose, onSave, onDelete, initialData
                   <img src={image} alt="Preview" className="mt-2 w-full h-48 object-cover rounded-md" />
                 )}
               </div>
+
               <div className="flex justify-end gap-2 text-black dark:text-white">
                 <Button variant="secondary" onClick={onClose}>Cancel</Button>
                 <Button onClick={handleSave}>Save</Button>
@@ -92,7 +105,10 @@ export default function NoteModal({ open, onClose, onSave, onDelete, initialData
           ) : (
             <>
               {/* Delete confirmation */}
-              <p className="text-gray-600 dark:text-gray-300">Are you sure you want to delete this note? This action cannot be undone.</p>
+              <p className="text-gray-600 dark:text-gray-300">
+                {description ? description : 'Are you sure you want to delete this note? This action cannot be undone.'}
+              </p>
+
               <div className="flex justify-end gap-2 text-black dark:text-white">
                 <Button variant="secondary" onClick={onClose}>Cancel</Button>
                 <Button variant="primary" onClick={handleConfirmDelete}>Delete</Button>
