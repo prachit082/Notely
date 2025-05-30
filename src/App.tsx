@@ -26,7 +26,7 @@ export default function App() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [deleteNoteId, setDeleteNoteId] = useState<number | null>(null);
   const [deleteNoteIds, setDeleteNoteIds] = useState<number[]>([]);
-  const [allNotes, setAllNotes] = useState<Note[]>([]);
+  const [, setAllNotes] = useState<Note[]>([]);
   const [trashMode, setTrashMode] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
