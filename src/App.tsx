@@ -3,7 +3,8 @@ import {
   getAllNotes,
   addNote,
   updateNote,
-  deleteNote,
+  deleteOldTrashedNotes,
+  softDeleteNote,
 } from "../src/db/noteService";
 import { Note } from "../src/db/db";
 import Landing from "./components/Landing";
@@ -11,10 +12,11 @@ import NotesList from "./components/NotesList";
 import ToggleTheme from "./components/ui/ToggleTheme";
 import { useTheme } from "./hooks/useTheme";
 import NoteModal from "./components/ui/NoteModal";
-import { List, LayoutGrid, Plus } from "lucide-react";
+import { List, LayoutGrid, Plus, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Footer from "./components/Footer";
 import jsPDF from "jspdf";
+import toast from "react-hot-toast";
 
 export default function App() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -24,6 +26,8 @@ export default function App() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [deleteNoteId, setDeleteNoteId] = useState<number | null>(null);
   const [deleteNoteIds, setDeleteNoteIds] = useState<number[]>([]);
+  const [allNotes, setAllNotes] = useState<Note[]>([]);
+  const [trashMode, setTrashMode] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
@@ -31,20 +35,26 @@ export default function App() {
 
   useEffect(() => {
     loadNotes();
-  }, [sortBy]);
+  }, [sortBy, trashMode]);
 
   const loadNotes = async () => {
-    let allNotes = await getAllNotes();
+    await deleteOldTrashedNotes();
 
-    if (sortBy === "title") {
-      allNotes = allNotes.sort((a, b) => a.title.localeCompare(b.title));
-    } else {
-      allNotes = allNotes.sort(
-        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-      );
-    }
+    const fetchedNotes = await getAllNotes();
+    setAllNotes(fetchedNotes); // Save all notes to allow filtering
 
-    setNotes(allNotes);
+    const filtered = trashMode
+      ? fetchedNotes.filter((note) => note.deletedAt)
+      : fetchedNotes.filter((note) => !note.deletedAt);
+
+    const sorted =
+      sortBy === "title"
+        ? filtered.sort((a, b) => a.title.localeCompare(b.title))
+        : filtered.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+          );
+
+    setNotes(sorted);
   };
 
   const handleAddNote = () => {
@@ -79,7 +89,8 @@ export default function App() {
 
   const confirmDeleteNote = async () => {
     if (deleteNoteId !== null) {
-      await deleteNote(deleteNoteId);
+      await softDeleteNote(deleteNoteId);
+      toast.success("Moved to Trash");
       await loadNotes();
       setDeleteNoteId(null); // Close the modal
     }
@@ -88,11 +99,18 @@ export default function App() {
   const confirmDeleteNotes = async () => {
     if (deleteNoteIds.length > 0) {
       for (const id of deleteNoteIds) {
-        await deleteNote(id);
+        await softDeleteNote(id);
       }
+      toast.success("Moved to Trash");
       await loadNotes();
       setDeleteNoteIds([]); // clear after delete
     }
+  };
+
+  const handleRestoreNote = async (id: number) => {
+    await updateNote(id, { deletedAt: null, updatedAt: new Date() });
+    toast.success("Note restored");
+    await loadNotes();
   };
 
   const exportNotes = (type: "pdf" | "txt") => {
@@ -155,8 +173,19 @@ export default function App() {
 
           {/* Sort controls */}
           <div className="flex items-center gap-2 sm:gap-4">
+            <button
+              onClick={() => setTrashMode(!trashMode)}
+              className={`px-3 py-2 rounded-md text-sm font-semibold ${
+                trashMode
+                  ? "bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
+                  : "bg-red-500 text-white"
+              } transition-all`}
+            >
+              {trashMode ? "Notes" : "Bin"}
+            </button>
+
+            {/* Sort Button */}
             <div className="relative">
-              {/* Sort Button */}
               <button
                 onClick={() => setDropdownOpen((prev) => !prev)}
                 className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -196,8 +225,8 @@ export default function App() {
                 )}
               </AnimatePresence>
             </div>
+            {/* Export Button */}
             <div className="relative">
-              {/* Export Button */}
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
                 className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -273,7 +302,17 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 w-full flex flex-col p-4 sm:p-6 lg:p-8">
-        {notes.length === 0 ? (
+        {trashMode && (
+          <div className="mb-4 text-center">
+            <h2 className="text-lg font-bold text-red-500">BIN</h2>
+            <p className="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <Trash2 size={16} className="text-red-500" />
+              Notes in bin will be permanently deleted after 15 days.
+            </p>
+          </div>
+        )}
+
+        {notes.length === 0 && !trashMode ? (
           <Landing />
         ) : (
           <NotesList
@@ -287,6 +326,8 @@ export default function App() {
                 setDeleteNoteId(idOrIds); // Set single ID
               }
             }}
+            onRestore={handleRestoreNote}
+            trashMode={trashMode}
             className="w-full max-w-7xl mx-auto"
           />
         )}

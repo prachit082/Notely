@@ -1,23 +1,32 @@
-import { useState } from 'react';
-import { Note } from '../db/db';
-import NoteCard from './NoteCard';
-import { Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState } from "react";
+import { Note } from "../db/db";
+import NoteCard from "./NoteCard";
+import { Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface NotesListProps {
   notes: Note[];
-  viewMode: 'list' | 'tiles';
+  viewMode: "list" | "tiles";
   onEdit: (id: number) => void;
   onDelete: (idOrIds: number | number[]) => void;
+  onRestore?: (id: number) => void;
+  trashMode?: boolean;
   className?: string;
 }
 
-export default function NotesList({ notes, viewMode, onEdit, onDelete }: NotesListProps) {
+export default function NotesList({
+  notes,
+  viewMode,
+  onEdit,
+  onDelete,
+  onRestore,
+  trashMode,
+}: NotesListProps) {
   const [selectedNotes, setSelectedNotes] = useState<number[]>([]);
 
   const handleSelectNote = (id: number) => {
     setSelectedNotes((prev) =>
-      prev.includes(id) ? prev.filter(noteId => noteId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((noteId) => noteId !== id) : [...prev, id]
     );
   };
 
@@ -39,7 +48,7 @@ export default function NotesList({ notes, viewMode, onEdit, onDelete }: NotesLi
             <motion.div
               initial={{ rotate: -20, scale: 0.8 }}
               animate={{ rotate: 0, scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
               whileTap={{ scale: 0.9 }}
             >
               <Trash2 size={20} className="text-black dark:text-white" />
@@ -53,7 +62,13 @@ export default function NotesList({ notes, viewMode, onEdit, onDelete }: NotesLi
       )}
 
       {/* Notes Grid */}
-      <div className={`grid gap-4 ${viewMode === 'tiles' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'flex flex-col'}`}>
+      <div
+        className={`grid gap-4 ${
+          viewMode === "tiles"
+            ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            : "flex flex-col"
+        }`}
+      >
         {notes.length === 0 ? (
           <div className="text-center text-lg text-gray-500 dark:text-gray-300">
             No notes found!
@@ -68,6 +83,8 @@ export default function NotesList({ notes, viewMode, onEdit, onDelete }: NotesLi
               onDelete={() => onDelete(note.id!)} // Pass onDelete function
               isSelected={selectedNotes.includes(note.id!)} // Check if note is selected
               onSelect={handleSelectNote} // Handle selection/deselection
+              onRestore={onRestore}
+              trashMode={trashMode}
             />
           ))
         )}

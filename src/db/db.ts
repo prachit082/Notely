@@ -4,9 +4,10 @@ export interface Note {
   id?: number;
   title: string;
   content: string;
-  image?: string; // base64 image
+  image?: string;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date | null;
 }
 
 class NotesDatabase extends Dexie {
@@ -15,7 +16,7 @@ class NotesDatabase extends Dexie {
   constructor() {
     super('notesDB');
     this.version(1).stores({
-      notes: '++id, title, createdAt, updatedAt',
+      notes: '++id, title, createdAt, updatedAt, deletedAt',
     });
   }
 }
