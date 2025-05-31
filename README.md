@@ -109,8 +109,6 @@ This project is licensed under the MIT License.
 
 ✅ Pin favorite notes to top.
 
-✅ Export notes to .txt or .pdf.
-
 ✅ Backend integration (optional).
 
 
