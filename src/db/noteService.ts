@@ -15,9 +15,9 @@ export const updateNote = async (id: number, updatedNote: Partial<Note>) => {
   });
 };
 
-// export const deleteNote = async (id: number) => {
-//   return await db.notes.delete(id);
-// };
+export const deleteNote = async (id: number) => {
+  return await db.notes.delete(id);
+};
 
 export async function softDeleteNote(id: number) {
   await db.notes.update(id, {

@@ -190,7 +190,7 @@ export default function App() {
                 onClick={() => setDropdownOpen((prev) => !prev)}
                 className="px-3 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
-                {sortBy === "createdAt" ? "Sort By Date" : "Sort By Title"}
+                {sortBy === "createdAt" ? "By Date" : "By Title"}
               </button>
 
               {/* Dropdown Options */}
