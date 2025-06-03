@@ -5,6 +5,7 @@ import {
   updateNote,
   deleteOldTrashedNotes,
   softDeleteNote,
+  deleteNote,
 } from "../src/db/noteService";
 import { Note } from "../src/db/db";
 import Landing from "./components/Landing";
@@ -98,10 +99,17 @@ export default function App() {
 
   const confirmDeleteNotes = async () => {
     if (deleteNoteIds.length > 0) {
-      for (const id of deleteNoteIds) {
-        await softDeleteNote(id);
+      if (!trashMode) {
+        for (const id of deleteNoteIds) {
+          await softDeleteNote(id);
+        }
+        toast.success("Moved to Trash");
+      } else {
+        for (const id of deleteNoteIds) {
+          await deleteNote(id);
+        }
+        toast.success("Notes permanently deleted");
       }
-      toast.success("Moved to Trash");
       await loadNotes();
       setDeleteNoteIds([]); // clear after delete
     }
