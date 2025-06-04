@@ -32,17 +32,19 @@ export default function App() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
+  // Custom hook to manage theme
   useTheme();
 
   useEffect(() => {
     loadNotes();
   }, [sortBy, trashMode]);
 
+  // Function to load notes from the database
   const loadNotes = async () => {
     await deleteOldTrashedNotes();
 
     const fetchedNotes = await getAllNotes();
-    setAllNotes(fetchedNotes); // Save all notes to allow filtering
+    setAllNotes(fetchedNotes);
 
     const filtered = trashMode
       ? fetchedNotes.filter((note) => note.deletedAt)
@@ -58,11 +60,13 @@ export default function App() {
     setNotes(sorted);
   };
 
+  // Function to handle adding a new note
   const handleAddNote = () => {
     setEditingNote(null);
     setIsModalOpen(true);
   };
 
+  // Function to handle editing an existing note
   const handleEditNote = (id: number) => {
     const note = notes.find((n) => n.id === id);
     if (!note) return;
@@ -70,6 +74,7 @@ export default function App() {
     setIsModalOpen(true);
   };
 
+  // Function to handle saving a note (either adding or updating)
   const handleSaveNote = async (data: {
     title: string;
     content: string;
@@ -88,22 +93,24 @@ export default function App() {
     setIsModalOpen(false);
   };
 
+  // Function to confirm deletion of a single note
   const confirmDeleteNote = async () => {
     if (deleteNoteId !== null) {
       await softDeleteNote(deleteNoteId);
-      toast.success("Moved to Trash");
+      toast.success("Moved to Bin");
       await loadNotes();
-      setDeleteNoteId(null); // Close the modal
+      setDeleteNoteId(null);
     }
   };
 
+  // Function to confirm deletion of multiple notes
   const confirmDeleteNotes = async () => {
     if (deleteNoteIds.length > 0) {
       if (!trashMode) {
         for (const id of deleteNoteIds) {
           await softDeleteNote(id);
         }
-        toast.success("Moved to Trash");
+        toast.success("Moved to Bin");
       } else {
         for (const id of deleteNoteIds) {
           await deleteNote(id);
@@ -111,16 +118,18 @@ export default function App() {
         toast.success("Notes permanently deleted");
       }
       await loadNotes();
-      setDeleteNoteIds([]); // clear after delete
+      setDeleteNoteIds([]);
     }
   };
 
+  // Function to restore a note from the trash
   const handleRestoreNote = async (id: number) => {
     await updateNote(id, { deletedAt: null, updatedAt: new Date() });
     toast.success("Note restored");
     await loadNotes();
   };
 
+  // Function to export notes as TXT or PDF
   const exportNotes = (type: "pdf" | "txt") => {
     if (notes.length === 0) return;
 

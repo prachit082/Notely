@@ -24,15 +24,17 @@ export default function NotesList({
 }: NotesListProps) {
   const [selectedNotes, setSelectedNotes] = useState<number[]>([]);
 
+  // Handle note selection and deselection
   const handleSelectNote = (id: number) => {
     setSelectedNotes((prev) =>
       prev.includes(id) ? prev.filter((noteId) => noteId !== id) : [...prev, id]
     );
   };
 
+  // Handle delete action for selected notes
   const handleDeleteNotes = (idOrIds: number | number[]) => {
     onDelete(idOrIds);
-    setSelectedNotes([]); // Clear selected notes after deleting
+    setSelectedNotes([]);
   };
 
   return (
